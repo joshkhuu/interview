@@ -1,5 +1,8 @@
 var gulp = require('gulp'),
     browserify = require('gulp-browserify'),
+    compass = require('gulp-compass'),
+    gutil = require('gulp-util'),
+    minifyCSS = require('gulp-minify-css'),
     webserver = require('gulp-webserver');
 
 var src = './process',
@@ -10,10 +13,10 @@ gulp.task('js', function() {
     .pipe(browserify({
       transform: 'reactify',
       debug: true
-    }))
+    })
     .on('error', function (err) {
       console.error('Error!', err.message);
-    })
+    }))
     .pipe(gulp.dest(app + '/js'));
 });
 
@@ -22,12 +25,21 @@ gulp.task('html', function() {
 });
 
 gulp.task('css', function() {
-  gulp.src( app + '/css/*.css');
+  gulp.src('./process/sass/style.scss')
+    .pipe(compass({
+      css: 'process/css',
+      sass: 'process/sass',
+      image: 'builds/app/images',
+      style: 'compressed'
+      })
+      .on('error', gutil.log))
+    .pipe(minifyCSS())
+    .pipe(gulp.dest('builds/app/css'))
 });
 
 gulp.task('watch', function() {
   gulp.watch( src + '/js/**/*', ['js']);
-  gulp.watch( app + '/css/**/*.css', ['css']);
+  gulp.watch( src + '/*.scss', ['css']);
   gulp.watch([ app + '/**/*.html'], ['html']);
 });
 
